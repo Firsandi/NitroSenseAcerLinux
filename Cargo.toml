@@ -1,0 +1,20 @@
+[package]
+name = "nitrosense-linux"
+version = "0.1.0"
+edition = "2021"
+authors = ["Firsandia <firsandia@local>"]
+description = "High-performance, lightweight Linux controller and monitor for Acer Nitro / Predator laptops"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+ratatui = "0.29"
+crossterm = { version = "0.28" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+colored = "2.1"
+anyhow = "1.0"
+
+[[bin]]
+name = "nitrosense"
+path = "src/main.rs"
+

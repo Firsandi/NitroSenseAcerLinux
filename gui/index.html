@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acer NitroSense - Hardware Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #06080c;
+      --bg-card: rgba(14, 18, 26, 0.82);
+      --bg-card-hover: rgba(22, 28, 40, 0.9);
+      --bg-header: rgba(10, 13, 20, 0.88);
+      
+      --nitro-red: #ff1e27;
+      --nitro-red-glow: rgba(255, 30, 39, 0.45);
+      --nitro-red-dim: rgba(255, 30, 39, 0.12);
+      
+      --cyber-cyan: #00e5ff;
+      --cyber-cyan-glow: rgba(0, 229, 255, 0.4);
+      --cyber-cyan-dim: rgba(0, 229, 255, 0.12);
+      
+      --accent-green: #00ff88;
+      --accent-green-dim: rgba(0, 255, 136, 0.15);
+      --accent-amber: #ffb700;
+      
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.14);
+      --border-active: var(--nitro-red);
+      
+      --text-main: #f0f3f8;
+      --text-muted: #8892a4;
+      --text-dim: #545e70;
+      
+      --font-display: 'Orbitron', -apple-system, sans-serif;
+      --font-ui: 'Rajdhani', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(255, 30, 39, 0.08) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      font-size: 15px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 24px;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* TOP HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--bg-header);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-medium);
+      border-radius: 8px;
+      position: relative;
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--nitro-red), transparent);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo-hex {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #1c2230 0%, #0d1117 100%);
+      border: 1px solid var(--nitro-red);
+      box-shadow: 0 0 14px var(--nitro-red-glow);
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-logo-hex svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--nitro-red);
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff 40%, var(--nitro-red) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .header-status-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .status-pill svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .status-pill.active {
+      border-color: rgba(0, 255, 136, 0.4);
+      background: var(--accent-green-dim);
+      color: var(--accent-green);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* OPERATING MODE TILES */
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .mode-tile {
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 16px 18px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .mode-tile::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      transition: all 0.22s ease;
+    }
+
+    .mode-tile:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-medium);
+      transform: translateY(-2px);
+    }
+
+    .mode-tile.active {
+      border-color: var(--nitro-red);
+      background: linear-gradient(180deg, var(--nitro-red-dim) 0%, rgba(14, 18, 26, 0.95) 100%);
+      box-shadow: 0 4px 20px rgba(255, 30, 39, 0.2);
+    }
+
+    .mode-tile.active::before {
+      background: var(--nitro-red);
+      box-shadow: 0 0 10px var(--nitro-red);
+    }
+
+    .mode-tile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mode-icon-wrap {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s ease;
+    }
+
+    .mode-icon-wrap svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .mode-tile.active .mode-icon-wrap {
+      background: var(--nitro-red);
+      border-color: var(--nitro-red);
+      box-shadow: 0 0 12px var(--nitro-red-glow);
+    }
+
+    .mode-tile.active .mode-icon-wrap svg {
+      fill: #ffffff;
+    }
+
+    .mode-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-dim);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .mode-tile.active .mode-badge {
+      background: var(--nitro-red);
+      color: #ffffff;
+      border-color: var(--nitro-red);
+    }
+
+    .mode-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .mode-desc {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* GLOBAL FAN TOOLBAR */
+    .global-fan-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+    }
+
+    .global-fan-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .global-fan-title svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--nitro-red);
+    }
+
+    .global-fan-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-global-fan {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-global-fan svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+
+    .btn-global-fan:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-color: var(--border-medium);
+    }
+
+    .btn-global-fan.active-turbo {
+      background: var(--nitro-red);
+      border-color: var(--nitro-red);
+      color: white;
+      box-shadow: 0 0 14px var(--nitro-red-glow);
+    }
+
+    /* HARDWARE TELEMETRY & FAN PANELS */
+    .panels-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .hw-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+    }
+
+    .hw-panel.cpu-panel {
+      border-left: 3px solid var(--nitro-red);
+    }
+
+    .hw-panel.gpu-panel {
+      border-left: 3px solid var(--cyber-cyan);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .panel-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-title-wrap svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .cpu-panel .panel-title-wrap svg {
+      fill: var(--nitro-red);
+    }
+
+    .gpu-panel .panel-title-wrap svg {
+      fill: var(--cyber-cyan);
+    }
+
+    .panel-title-text {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .panel-hardware-spec {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 3px 8px;
+      border-radius: 3px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* TELEMETRY BODY */
+    .telemetry-layout {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* Circular Tachometer Dial */
+    .tachometer-box {
+      width: 140px;
+      height: 140px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tacho-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .tacho-track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 9;
+    }
+
+    .tacho-fill {
+      fill: none;
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-dasharray: 408;
+      stroke-dashoffset: 200;
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .cpu-panel .tacho-fill {
+      stroke: var(--nitro-red);
+      filter: drop-shadow(0 0 6px var(--nitro-red-glow));
+    }
+
+    .gpu-panel .tacho-fill {
+      stroke: var(--cyber-cyan);
+      filter: drop-shadow(0 0 6px var(--cyber-cyan-glow));
+    }
+
+    .tacho-inner {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tacho-temp {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .tacho-unit {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Numeric Telemetry Metrics */
+    .metric-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .metric-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .metric-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .bar-fill-cpu {
+      background: linear-gradient(90deg, #ff4d5a, var(--nitro-red));
+      box-shadow: 0 0 8px var(--nitro-red-glow);
+    }
+
+    .bar-fill-gpu {
+      background: linear-gradient(90deg, #00b0ff, var(--cyber-cyan));
+      box-shadow: 0 0 8px var(--cyber-cyan-glow);
+    }
+
+    .bar-fill-ram {
+      background: linear-gradient(90deg, #9d4edd, #c77dff);
+    }
+
+    /* INDEPENDENT FAN CONTROL MODULE */
+    .fan-control-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .fan-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .fan-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .fan-rotor-icon {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-muted);
+      transform-origin: center center;
+    }
+
+    .fan-rotor-icon.spinning {
+      animation: spinRotor 1.2s infinite linear;
+    }
+
+    .fan-rotor-icon.spinning-fast {
+      animation: spinRotor 0.5s infinite linear;
+    }
+
+    @keyframes spinRotor {
+      100% { transform: rotate(360deg); }
+    }
+
+    .fan-rpm-badge {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-green);
+    }
+
+    .fan-rpm-badge span {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Mode Pill Buttons */
+    .fan-mode-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-fan-pill {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 7px 0;
+      border-radius: 3px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-fan-pill:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cpu-panel .btn-fan-pill.active {
+      background: var(--nitro-red);
+      color: #ffffff;
+      box-shadow: 0 0 10px var(--nitro-red-glow);
+    }
+
+    .gpu-panel .btn-fan-pill.active {
+      background: var(--cyber-cyan);
+      color: #06080c;
+      box-shadow: 0 0 10px var(--cyber-cyan-glow);
+    }
+
+    /* Fan Speed Slider */
+    .fan-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: opacity 0.2s ease;
+    }
+
+    .fan-slider-row.disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .fan-range-slider {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .fan-range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      border: 2px solid var(--nitro-red);
+      box-shadow: 0 0 8px var(--nitro-red-glow);
+      transition: transform 0.15s ease;
+    }
+
+    .gpu-panel .fan-range-slider::-webkit-slider-thumb {
+      border-color: var(--cyber-cyan);
+      box-shadow: 0 0 8px var(--cyber-cyan-glow);
+    }
+
+    .fan-range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .fan-pct-display {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      width: 44px;
+      text-align: right;
+    }
+
+    /* QUICK CONTROLS */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .control-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .control-icon-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control-icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-icon-wrap svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-muted);
+    }
+
+    .control-meta h3 {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .control-meta p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Cyber Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider-track {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-medium);
+      transition: 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border-radius: 12px;
+    }
+
+    .slider-track:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border-radius: 50%;
+    }
+
+    input:checked + .slider-track {
+      background-color: var(--nitro-red);
+      border-color: var(--nitro-red);
+      box-shadow: 0 0 10px var(--nitro-red-glow);
+    }
+
+    input:checked + .slider-track:before {
+      transform: translateX(20px);
+      background-color: #ffffff;
+    }
+
+    /* FOOTER */
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      padding: 8px 10px;
+    }
+
+    .hotkey-list {
+      display: flex;
+      gap: 12px;
+    }
+
+    .hotkey-list span {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--text-muted);
+    }
+
+    /* TOAST ALERT */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--nitro-red);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 14px var(--nitro-red-glow);
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.25s ease;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #toast svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--nitro-red);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- TOP HEADER -->
+    <header>
+      <div class="brand-section">
+        <div class="brand-logo-hex">
+          <!-- Stylized N Logo SVG -->
+          <svg viewBox="0 0 24 24">
+            <path d="M4 3h3.5l9 12.5V3H20v18h-3.5L7.5 8.5V21H4V3z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>NITROSENSE</h1>
+          <span>LINUX HARDWARE COMMAND CENTER</span>
+        </div>
+      </div>
+
+      <div class="header-status-group">
+        <div class="status-pill active">
+          <div class="pulse-dot"></div>
+          <span id="sys-model">ACER NITRO</span>
+        </div>
+
+        <div class="status-pill" id="power-pill">
+          <!-- Plug Icon SVG -->
+          <svg viewBox="0 0 24 24">
+            <path d="M16 7V3h-2v4h-4V3H8v4H6v5l3.5 3.5V21h5v-5.5L18 12V7h-2z"/>
+          </svg>
+          <span id="sys-power">AC CONNECTED</span>
+        </div>
+
+        <div class="status-pill">
+          <!-- Battery Icon SVG -->
+          <svg viewBox="0 0 24 24">
+            <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/>
+          </svg>
+          <span id="sys-battery">80%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- OPERATING MODE SELECTION -->
+    <div class="modes-grid">
+      <!-- Quiet Mode -->
+      <div class="mode-tile" id="mode-quiet" onclick="selectOperatingMode('quiet')">
+        <div class="mode-tile-top">
+          <div class="mode-icon-wrap">
+            <!-- Feather / Silent SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M21 3c-1.5 0-4 1-6.5 3.5S8 12.5 7 15l-4 1 1-4c2.5-1 6-5 8.5-7.5S19.5 3 21 3zM3 21l3-1-2-2-1 3z"/>
+            </svg>
+          </div>
+          <span class="mode-badge">[1]</span>
+        </div>
+        <div class="mode-title">Quiet</div>
+        <div class="mode-desc">Ultra-low fan acoustic profile with energy-saving CPU governor.</div>
+      </div>
+
+      <!-- Balanced Mode -->
+      <div class="mode-tile active" id="mode-balanced" onclick="selectOperatingMode('balanced')">
+        <div class="mode-tile-top">
+          <div class="mode-icon-wrap">
+            <!-- Balance / Gauge SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+          </div>
+          <span class="mode-badge">[2]</span>
+        </div>
+        <div class="mode-title">Balanced</div>
+        <div class="mode-desc">Intelligent dynamic thermal curve for everyday multitasking.</div>
+      </div>
+
+      <!-- Performance Mode -->
+      <div class="mode-tile" id="mode-performance" onclick="selectOperatingMode('performance')">
+        <div class="mode-tile-top">
+          <div class="mode-icon-wrap">
+            <!-- Lightning Bolt SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+            </svg>
+          </div>
+          <span class="mode-badge">[3]</span>
+        </div>
+        <div class="mode-title">Performance</div>
+        <div class="mode-desc">Aggressive clock frequency governor with high cooling response.</div>
+      </div>
+    </div>
+
+    <!-- GLOBAL FAN OVERVIEW & QUICK ACTIONS -->
+    <div class="global-fan-bar">
+      <div class="global-fan-title">
+        <!-- Turbine Fan Icon -->
+        <svg viewBox="0 0 24 24">
+          <path d="M12 11a1 1 0 1 0 1 1 1 1 0 0 0-1-1zm0-9a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V19a1 1 0 0 1-2 0v-2.07A4.94 4.94 0 0 1 7.07 13H5a1 1 0 0 1 0-2h2.07A4.94 4.94 0 0 1 11 7.07V5a1 1 0 0 1 2 0v2.07A4.94 4.94 0 0 1 16.93 11H19a1 1 0 0 1 0 2h-2.07A4.94 4.94 0 0 1 13 16.93z"/>
+        </svg>
+        <span>Aeroblade Fan Control Matrix</span>
+      </div>
+
+      <div class="global-fan-actions">
+        <button class="btn-global-fan" onclick="setAllFans('auto')">
+          <!-- Refresh Icon -->
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          ALL AUTO [A]
+        </button>
+
+        <button class="btn-global-fan" id="btn-global-turbo" onclick="setAllFans('max')">
+          <!-- Fire / Boost Icon -->
+          <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+          ALL MAX [X]
+        </button>
+
+        <button class="btn-global-fan" id="btn-sync-toggle" onclick="toggleFanSync()">
+          <!-- Link Icon -->
+          <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s2.24-5-5-5z"/></svg>
+          <span id="sync-btn-text">SYNC FANS: OFF</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD: CPU & GPU -->
+    <div class="panels-grid">
+      
+      <!-- CPU PANEL -->
+      <div class="hw-panel cpu-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <!-- CPU Microchip SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M6 2v2H4v2H2v2h2v2H2v2h2v2H2v2h2v2h2v2h2v-2h2v2h2v-2h2v2h2v-2h2v2h2v-2h2v-2h2v-2h-2v-2h2v-2h-2V8h2V6h-2V4h-2V2h-2v2h-2V2h-2v2h-2V2h-2v2H8V2H6zm0 4h12v12H6V6zm2 2v8h8V8H8z"/>
+            </svg>
+            <span class="panel-title-text">CPU PROCESSOR</span>
+          </div>
+          <span class="panel-hardware-spec" id="cpu-model">Intel Core i5-13420H</span>
+        </div>
+
+        <div class="telemetry-layout">
+          <div class="tachometer-box">
+            <svg class="tacho-svg" viewBox="0 0 140 140">
+              <circle class="tacho-track" cx="70" cy="70" r="65" />
+              <circle class="tacho-fill" id="cpu-tacho-fill" cx="70" cy="70" r="65" />
+            </svg>
+            <div class="tacho-inner">
+              <div class="tacho-temp" id="cpu-temp-text">--°</div>
+              <div class="tacho-unit">CELSIUS</div>
+            </div>
+          </div>
+
+          <div class="metric-rows">
+            <div class="metric-row">
+              <div class="metric-meta">
+                <span>CPU Utilization</span>
+                <span class="metric-val" id="cpu-usage-text">0%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill bar-fill-cpu" id="cpu-usage-bar"></div>
+              </div>
+            </div>
+
+            <div class="metric-row">
+              <div class="metric-meta">
+                <span>Core Frequency</span>
+                <span class="metric-val" id="cpu-freq-text">0 MHz</span>
+              </div>
+            </div>
+
+            <div class="metric-row">
+              <div class="metric-meta">
+                <span>System Memory</span>
+                <span class="metric-val" id="ram-text">0 / 0 GB</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill bar-fill-ram" id="ram-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CPU Fan Control Card -->
+        <div class="fan-control-card">
+          <div class="fan-card-top">
+            <div class="fan-card-title">
+              <!-- Fan Rotor SVG -->
+              <svg class="fan-rotor-icon" id="cpu-rotor" viewBox="0 0 24 24">
+                <path d="M12 11a1 1 0 1 0 1 1 1 1 0 0 0-1-1zm0-9a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V19a1 1 0 0 1-2 0v-2.07A4.94 4.94 0 0 1 7.07 13H5a1 1 0 0 1 0-2h2.07A4.94 4.94 0 0 1 11 7.07V5a1 1 0 0 1 2 0v2.07A4.94 4.94 0 0 1 16.93 11H19a1 1 0 0 1 0 2h-2.07A4.94 4.94 0 0 1 13 16.93z"/>
+              </svg>
+              <span>CPU Fan</span>
+            </div>
+            <div class="fan-rpm-badge">
+              <span id="cpu-rpm-text">0</span>
+              <span>RPM</span>
+            </div>
+          </div>
+
+          <div class="fan-mode-selector">
+            <button class="btn-fan-pill active" id="btn-cpu-auto" onclick="setSingleFan('cpu', 'auto')">AUTO</button>
+            <button class="btn-fan-pill" id="btn-cpu-max" onclick="setSingleFan('cpu', 'max')">MAX</button>
+            <button class="btn-fan-pill" id="btn-cpu-custom" onclick="setSingleFan('cpu', 'custom')">CUSTOM</button>
+          </div>
+
+          <div class="fan-slider-row disabled" id="cpu-slider-row">
+            <input type="range" min="20" max="100" value="50" class="fan-range-slider" id="cpu-slider" oninput="onCpuSlider(this.value)">
+            <span class="fan-pct-display" id="cpu-pct-text">50%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GPU PANEL -->
+      <div class="hw-panel gpu-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <!-- Dedicated GPU Card SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 18V6h16v12H4zm4-9h8v6H8z"/>
+            </svg>
+            <span class="panel-title-text">DEDICATED GPU</span>
+          </div>
+          <span class="panel-hardware-spec" id="gpu-model">NVIDIA RTX Series</span>
+        </div>
+
+        <div class="telemetry-layout">
+          <div class="tachometer-box">
+            <svg class="tacho-svg" viewBox="0 0 140 140">
+              <circle class="tacho-track" cx="70" cy="70" r="65" />
+              <circle class="tacho-fill" id="gpu-tacho-fill" cx="70" cy="70" r="65" />
+            </svg>
+            <div class="tacho-inner">
+              <div class="tacho-temp" id="gpu-temp-text">--°</div>
+              <div class="tacho-unit">CELSIUS</div>
+            </div>
+          </div>
+
+          <div class="metric-rows">
+            <div class="metric-row">
+              <div class="metric-meta">
+                <span>GPU Utilization</span>
+                <span class="metric-val" id="gpu-usage-text">0%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill bar-fill-gpu" id="gpu-usage-bar"></div>
+              </div>
+            </div>
+
+            <div class="metric-row">
+              <div class="metric-meta">
+                <span>Clock & Board Power</span>
+                <span class="metric-val" id="gpu-power-text">0 MHz | 0.0 W</span>
+              </div>
+            </div>
+
+            <div class="metric-row">
+              <div class="metric-meta">
+                <span>Video Memory (VRAM)</span>
+                <span class="metric-val" id="vram-text">0 / 0 MB</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill bar-fill-gpu" id="vram-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GPU Fan Control Card -->
+        <div class="fan-control-card">
+          <div class="fan-card-top">
+            <div class="fan-card-title">
+              <!-- Fan Rotor SVG -->
+              <svg class="fan-rotor-icon" id="gpu-rotor" viewBox="0 0 24 24">
+                <path d="M12 11a1 1 0 1 0 1 1 1 1 0 0 0-1-1zm0-9a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V19a1 1 0 0 1-2 0v-2.07A4.94 4.94 0 0 1 7.07 13H5a1 1 0 0 1 0-2h2.07A4.94 4.94 0 0 1 11 7.07V5a1 1 0 0 1 2 0v2.07A4.94 4.94 0 0 1 16.93 11H19a1 1 0 0 1 0 2h-2.07A4.94 4.94 0 0 1 13 16.93z"/>
+              </svg>
+              <span>GPU Fan</span>
+            </div>
+            <div class="fan-rpm-badge">
+              <span id="gpu-rpm-text">0</span>
+              <span>RPM</span>
+            </div>
+          </div>
+
+          <div class="fan-mode-selector">
+            <button class="btn-fan-pill active" id="btn-gpu-auto" onclick="setSingleFan('gpu', 'auto')">AUTO</button>
+            <button class="btn-fan-pill" id="btn-gpu-max" onclick="setSingleFan('gpu', 'max')">MAX</button>
+            <button class="btn-fan-pill" id="btn-gpu-custom" onclick="setSingleFan('gpu', 'custom')">CUSTOM</button>
+          </div>
+
+          <div class="fan-slider-row disabled" id="gpu-slider-row">
+            <input type="range" min="20" max="100" value="50" class="fan-range-slider" id="gpu-slider" oninput="onGpuSlider(this.value)">
+            <span class="fan-pct-display" id="gpu-pct-text">50%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK HARDWARE SWITCHES -->
+    <div class="controls-grid">
+      <!-- Battery Care Switch -->
+      <div class="control-card">
+        <div class="control-icon-info">
+          <div class="control-icon-wrap">
+            <!-- Shield Battery SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v6h-2V7zm0 8h2v2h-2v-2z"/>
+            </svg>
+          </div>
+          <div class="control-meta">
+            <h3>Battery Care Limit</h3>
+            <p id="battery-status-hint">Caps charge at 80% to protect lifespan</p>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="battery-switch" checked onchange="onBatteryToggle(this.checked)">
+          <span class="slider-track"></span>
+        </label>
+      </div>
+
+      <!-- Keyboard Backlight Timeout Switch -->
+      <div class="control-card">
+        <div class="control-icon-info">
+          <div class="control-icon-wrap">
+            <!-- Keyboard Matrix SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
+            </svg>
+          </div>
+          <div class="control-meta">
+            <h3>Backlight 30s Sleep</h3>
+            <p id="backlight-status-hint">Automated keyboard illumination sleep</p>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="backlight-switch" checked onchange="onBacklightToggle(this.checked)">
+          <span class="slider-track"></span>
+        </label>
+      </div>
+
+      <!-- Driver Status Card -->
+      <div class="control-card">
+        <div class="control-icon-info">
+          <div class="control-icon-wrap">
+            <!-- Kernel Microchip SVG -->
+            <svg viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+            </svg>
+          </div>
+          <div class="control-meta">
+            <h3>Kernel Driver</h3>
+            <p>linuwu_sense / acer-wmi active</p>
+          </div>
+        </div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div>Acer NitroSense Linux Edition • Native Rust Daemon</div>
+      <div class="hotkey-list">
+        <span>[1-3] Operating Mode</span>
+        <span>[A] All Auto</span>
+        <span>[X] All Max</span>
+        <span>[B] Battery Care</span>
+        <span>[K] Backlight</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast">
+    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    <span id="toast-text">Settings Applied</span>
+  </div>
+
+  <script>
+    // State management
+    let activeProfile = "balanced";
+    let cpuFanMode = "auto";
+    let gpuFanMode = "auto";
+    let cpuFanSpeed = 50;
+    let gpuFanSpeed = 50;
+    let fansSynced = false;
+    
+    // Prevent polling rubber-banding for mode and toggle switches
+    let userModeLockTime = 0;
+    let userBatteryLockTime = 0;
+    let userBacklightLockTime = 0;
+    const TACHO_CIRCUMFERENCE = 408;
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toast-text").innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function updateBatteryUI(checked) {
+      const hint = document.getElementById("battery-status-hint");
+      if (hint) {
+        if (checked) {
+          hint.innerHTML = '<span style="color: var(--accent-green); font-weight: 700;">PROTECTED</span> (80% LIMIT - NOT CHARGING)';
+        } else {
+          hint.innerHTML = '<span style="color: var(--accent-amber); font-weight: 700;">FULL CAPACITY</span> (100% CHARGE ALLOWED)';
+        }
+      }
+    }
+
+    function updateBacklightUI(checked) {
+      const hint = document.getElementById("backlight-status-hint");
+      if (hint) {
+        if (checked) {
+          hint.innerHTML = '<span style="color: var(--cyber-cyan); font-weight: 700;">AUTO-SLEEP</span> (TURNS OFF AFTER 30S IDLE)';
+        } else {
+          hint.innerHTML = '<span style="color: var(--text-muted); font-weight: 700;">ALWAYS ON</span> (CONTINUOUS ILLUMINATION)';
+        }
+      }
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch("/api/status");
+        if (!res.ok) return;
+        const data = await res.json();
+        updateUI(data);
+      } catch (e) {
+        console.error("Telemetry error", e);
+      }
+    }
+
+    function updateUI(data) {
+      const m = data.metrics;
+      const s = data.system;
+
+      // Header System Info
+      document.getElementById("sys-model").innerText = s.model || "ACER NITRO";
+      document.getElementById("cpu-model").innerText = s.cpu_model || "Intel Core Processor";
+      document.getElementById("gpu-model").innerText = s.gpu_model || "Dedicated GPU";
+      document.getElementById("sys-battery").innerText = m.battery_pct + "%";
+
+      // Power Pill
+      const pText = m.ac_plugged ? (m.battery_charging ? "AC CHARGING" : "AC CONNECTED") : "BATTERY DISCHARGE";
+      document.getElementById("sys-power").innerText = pText;
+
+      // Telemetry: CPU
+      document.getElementById("cpu-temp-text").innerText = Math.round(m.cpu_temp_c) + "°";
+      document.getElementById("cpu-usage-text").innerText = Math.round(m.cpu_usage_pct) + "%";
+      document.getElementById("cpu-usage-bar").style.width = Math.min(100, Math.max(0, m.cpu_usage_pct)) + "%";
+      document.getElementById("cpu-freq-text").innerText = m.cpu_freq_mhz + " MHz";
+
+      // CPU Tachometer Dial Offset
+      const cpuTachoOffset = TACHO_CIRCUMFERENCE - (Math.min(100, m.cpu_temp_c) / 100) * TACHO_CIRCUMFERENCE;
+      document.getElementById("cpu-tacho-fill").style.strokeDashoffset = cpuTachoOffset;
+
+      // System RAM
+      const ramUsedGb = (m.ram_used_mb / 1024).toFixed(1);
+      const ramTotalGb = (m.ram_total_mb / 1024).toFixed(1);
+      const ramPct = Math.round((m.ram_used_mb / m.ram_total_mb) * 100);
+      document.getElementById("ram-text").innerText = `${ramUsedGb} / ${ramTotalGb} GB (${ramPct}%)`;
+      document.getElementById("ram-bar").style.width = ramPct + "%";
+
+      // Telemetry: GPU
+      document.getElementById("gpu-temp-text").innerText = Math.round(m.gpu_temp_c) + "°";
+      document.getElementById("gpu-usage-text").innerText = Math.round(m.gpu_usage_pct) + "%";
+      document.getElementById("gpu-usage-bar").style.width = Math.min(100, Math.max(0, m.gpu_usage_pct)) + "%";
+      document.getElementById("gpu-power-text").innerText = `${m.gpu_clock_mhz} MHz | ${m.gpu_power_w.toFixed(1)} W`;
+      document.getElementById("vram-text").innerText = `${m.vram_used_mb} / ${m.vram_total_mb} MB`;
+      document.getElementById("vram-bar").style.width = ((m.vram_used_mb / m.vram_total_mb) * 100) + "%";
+
+      // GPU Tachometer Dial Offset
+      const gpuTachoOffset = TACHO_CIRCUMFERENCE - (Math.min(100, m.gpu_temp_c) / 100) * TACHO_CIRCUMFERENCE;
+      document.getElementById("gpu-tacho-fill").style.strokeDashoffset = gpuTachoOffset;
+
+      // Fan RPM Readouts
+      document.getElementById("cpu-rpm-text").innerText = m.cpu_fan_rpm || "0";
+      document.getElementById("gpu-rpm-text").innerText = m.gpu_fan_rpm || "0";
+
+      // Rotor dynamic rotation animations based on RPM
+      updateRotorAnimation("cpu-rotor", m.cpu_fan_rpm);
+      updateRotorAnimation("gpu-rotor", m.gpu_fan_rpm);
+
+      // Only update mode highlighting if user has not clicked recently
+      if (Date.now() - userModeLockTime > 3500) {
+        if (m.current_profile && m.current_profile !== activeProfile) {
+          applyModeHighlight(m.current_profile);
+        }
+      }
+
+      // Switches sync with local lock protection
+      if (Date.now() - userBatteryLockTime > 3500) {
+        document.getElementById("battery-switch").checked = m.battery_limiter_active;
+        updateBatteryUI(m.battery_limiter_active);
+      }
+      if (Date.now() - userBacklightLockTime > 3500) {
+        document.getElementById("backlight-switch").checked = m.backlight_timeout_active;
+        updateBacklightUI(m.backlight_timeout_active);
+      }
+    }
+
+    function updateRotorAnimation(elementId, rpm) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      if (rpm > 3500) {
+        el.className = "fan-rotor-icon spinning-fast";
+      } else if (rpm > 500) {
+        el.className = "fan-rotor-icon spinning";
+      } else {
+        el.className = "fan-rotor-icon";
+      }
+    }
+
+    // OPERATING MODE SELECTION
+    function applyModeHighlight(mode) {
+      activeProfile = mode.toLowerCase();
+      ["quiet", "balanced", "performance"].forEach(m => {
+        const tile = document.getElementById("mode-" + m);
+        if (tile) {
+          tile.classList.toggle("active", m === activeProfile);
+        }
+      });
+    }
+
+    async function selectOperatingMode(mode) {
+      userModeLockTime = Date.now();
+      applyModeHighlight(mode);
+      showToast(`Operating Mode: ${mode.toUpperCase()}`);
+
+      try {
+        await fetch("/api/mode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // INDEPENDENT FAN CONTROLS
+    function setFanPillsUI(target, mode) {
+      ["auto", "max", "custom"].forEach(m => {
+        const btn = document.getElementById(`btn-${target}-${m}`);
+        if (btn) btn.classList.toggle("active", m === mode);
+      });
+
+      const sliderRow = document.getElementById(`${target}-slider-row`);
+      if (sliderRow) {
+        sliderRow.classList.toggle("disabled", mode !== "custom");
+      }
+    }
+
+    async function setSingleFan(target, mode, speed) {
+      if (target === "cpu") {
+        cpuFanMode = mode;
+        if (speed !== undefined) cpuFanSpeed = speed;
+        setFanPillsUI("cpu", mode);
+      } else if (target === "gpu") {
+        gpuFanMode = mode;
+        if (speed !== undefined) gpuFanSpeed = speed;
+        setFanPillsUI("gpu", mode);
+      }
+
+      if (fansSynced) {
+        const other = target === "cpu" ? "gpu" : "cpu";
+        if (other === "cpu") {
+          cpuFanMode = mode;
+          if (speed !== undefined) cpuFanSpeed = speed;
+          setFanPillsUI("cpu", mode);
+          document.getElementById("cpu-slider").value = cpuFanSpeed;
+          document.getElementById("cpu-pct-text").innerText = cpuFanSpeed + "%";
+        } else {
+          gpuFanMode = mode;
+          if (speed !== undefined) gpuFanSpeed = speed;
+          setFanPillsUI("gpu", mode);
+          document.getElementById("gpu-slider").value = gpuFanSpeed;
+          document.getElementById("gpu-pct-text").innerText = gpuFanSpeed + "%";
+        }
+      }
+
+      showToast(`${target.toUpperCase()} Fan: ${mode.toUpperCase()}`);
+
+      try {
+        await fetch("/api/fan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            target: fansSynced ? "both" : target,
+            mode: mode,
+            speed: target === "cpu" ? cpuFanSpeed : gpuFanSpeed
+          })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function onCpuSlider(val) {
+      cpuFanSpeed = parseInt(val);
+      document.getElementById("cpu-pct-text").innerText = val + "%";
+      setSingleFan("cpu", "custom", cpuFanSpeed);
+    }
+
+    function onGpuSlider(val) {
+      gpuFanSpeed = parseInt(val);
+      document.getElementById("gpu-pct-text").innerText = val + "%";
+      setSingleFan("gpu", "custom", gpuFanSpeed);
+    }
+
+    async function setAllFans(mode) {
+      cpuFanMode = mode;
+      gpuFanMode = mode;
+      setFanPillsUI("cpu", mode);
+      setFanPillsUI("gpu", mode);
+
+      showToast(`All Fans: ${mode.toUpperCase()}`);
+
+      try {
+        await fetch("/api/fan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            target: "both",
+            mode: mode,
+            speed: mode === "max" ? 100 : (mode === "auto" ? 0 : cpuFanSpeed)
+          })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function toggleFanSync() {
+      fansSynced = !fansSynced;
+      const btn = document.getElementById("btn-sync-toggle");
+      const txt = document.getElementById("sync-btn-text");
+      if (fansSynced) {
+        btn.classList.add("active-turbo");
+        txt.innerText = "SYNC FANS: ON";
+        showToast("Fans Synchronized: Any adjustment affects both");
+        // Mirror GPU to CPU
+        gpuFanMode = cpuFanMode;
+        gpuFanSpeed = cpuFanSpeed;
+        setFanPillsUI("gpu", gpuFanMode);
+        document.getElementById("gpu-slider").value = gpuFanSpeed;
+        document.getElementById("gpu-pct-text").innerText = gpuFanSpeed + "%";
+      } else {
+        btn.classList.remove("active-turbo");
+        txt.innerText = "SYNC FANS: OFF";
+        showToast("Independent Fan Control Unlocked");
+      }
+    }
+
+    // SWITCH TOGGLES
+    async function onBatteryToggle(checked) {
+      userBatteryLockTime = Date.now();
+      updateBatteryUI(checked);
+      showToast(checked ? "Battery Care (80% Limit) Active" : "Full Charge (100%) Allowed");
+      try {
+        await fetch("/api/battery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ limit: checked ? 80 : 100 })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function onBacklightToggle(checked) {
+      userBacklightLockTime = Date.now();
+      updateBacklightUI(checked);
+      showToast(checked ? "Keyboard 30s Sleep ON" : "Keyboard Always ON");
+      try {
+        await fetch("/api/backlight", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ timeout: checked ? "on" : "off" })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // KEYBOARD SHORTCUTS
+    window.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT") return;
+      const k = e.key.toLowerCase();
+      if (k === "1") selectOperatingMode("quiet");
+      else if (k === "2") selectOperatingMode("balanced");
+      else if (k === "3") selectOperatingMode("performance");
+      else if (k === "a") setAllFans("auto");
+      else if (k === "x") setAllFans("max");
+      else if (k === "b") {
+        const sw = document.getElementById("battery-switch");
+        sw.checked = !sw.checked;
+        onBatteryToggle(sw.checked);
+      } else if (k === "k") {
+        const sw = document.getElementById("backlight-switch");
+        sw.checked = !sw.checked;
+        onBacklightToggle(sw.checked);
+      }
+    });
+
+    // Initial load and periodic polling
+    fetchStatus();
+    setInterval(fetchStatus, 1000);
+  </script>
+</body>
+</html>

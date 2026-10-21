@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Acer NitroSense
+GenericName=Gaming Hardware Control
+Comment=Acer Nitro Gaming Hardware & Fan Control Center
+Exec=sh -c "export PATH=$HOME/.cargo/bin:$PATH; exec nitrosense gui"
+Terminal=false
+Type=Application
+Categories=System;Settings;HardwareSettings;
+Icon=nitrosense
+StartupWMClass=nitrosense
+Keywords=acer;nitro;nitrosense;fans;thermal;hardware;gaming;
