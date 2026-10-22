@@ -101,7 +101,7 @@ fn launch_gui_window(url: &str) -> Result<()> {
         let res = Command::new(browser)
             .args([
                 &app_arg,
-                "--window-size=1240,820",
+                "--start-maximized",
                 "--class=nitrosense",
                 "--user-data-dir=/tmp/nitrosense-app-profile",
             ])

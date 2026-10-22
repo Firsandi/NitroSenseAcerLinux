@@ -7,13 +7,13 @@ def launch_native_window(url):
         import gi
         gi.require_version('Gtk', '3.0')
         gi.require_version('WebKit2', '4.1')
-        from gi.repository import Gtk, WebKit2, GLib, GdkPixbuf
+        from gi.repository import Gtk, WebKit2, GLib, GdkPixbuf, Gdk
 
         GLib.set_prgname('nitrosense')
         GLib.set_application_name('Acer NitroSense')
 
         window = Gtk.Window(title='Acer NitroSense - Control Center')
-        window.set_default_size(1240, 820)
+        window.set_default_size(1366, 860)
         window.set_position(Gtk.WindowPosition.CENTER)
 
         # Set custom NitroSense icon
@@ -40,11 +40,40 @@ def launch_native_window(url):
         wk = webview.get_settings()
         wk.set_enable_javascript(True)
         wk.set_enable_webgl(True)
+        wk.set_enable_fullscreen(True)
+
+        def on_enter_fullscreen(view):
+            window.fullscreen()
+            return True
+
+        def on_leave_fullscreen(view):
+            window.unfullscreen()
+            return True
+
+        webview.connect('enter-fullscreen', on_enter_fullscreen)
+        webview.connect('leave-fullscreen', on_leave_fullscreen)
+
+        def on_key_press(win, event):
+            if event.keyval == Gdk.KEY_F11:
+                gdk_win = win.get_window()
+                state = gdk_win.get_state() if gdk_win else 0
+                if state & Gdk.WindowState.FULLSCREEN:
+                    win.unfullscreen()
+                else:
+                    win.fullscreen()
+                return True
+            return False
+
+        window.connect('key-press-event', on_key_press)
 
         webview.load_uri(url)
         window.add(webview)
         window.connect('destroy', Gtk.main_quit)
+
+        # Start maximized to fill the screen seamlessly
         window.show_all()
+        window.maximize()
+        GLib.idle_add(window.maximize)
         Gtk.main()
         return True
     except Exception as e:

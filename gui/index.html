@@ -63,12 +63,14 @@
     }
 
     .container {
-      max-width: 1240px;
+      width: 100%;
+      max-width: 1840px;
       margin: 0 auto;
-      padding: 16px 20px;
+      padding: 18px 32px;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      box-sizing: border-box;
     }
 
     /* TOP HEADER */
@@ -177,6 +179,27 @@
       background: var(--accent-green);
       box-shadow: 0 0 8px var(--accent-green);
       animation: pulse 1.8s infinite ease-in-out;
+    }
+
+    .btn-fullscreen-toggle {
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-fullscreen-toggle:hover {
+      background: rgba(255, 30, 39, 0.15);
+      border-color: var(--nitro-red);
+      color: #ffffff;
+      box-shadow: 0 0 10px var(--nitro-red-glow);
+    }
+
+    .btn-fullscreen-toggle.active {
+      background: var(--nitro-red-dim);
+      border-color: var(--nitro-red);
+      color: var(--nitro-red);
     }
 
     @keyframes pulse {
@@ -932,6 +955,14 @@
           </svg>
           <span id="sys-battery">80%</span>
         </div>
+
+        <button class="status-pill btn-fullscreen-toggle" id="btn-fullscreen" onclick="toggleFullScreen()" title="Toggle Fullscreen (F11)">
+          <!-- Expand/Compress SVG -->
+          <svg id="fullscreen-icon" viewBox="0 0 24 24">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+          </svg>
+          <span id="fullscreen-text">FULLSCREEN [F11]</span>
+        </button>
       </div>
     </header>
 
@@ -1255,6 +1286,7 @@
         <span>[X] All Max</span>
         <span>[B] Battery Care</span>
         <span>[K] Backlight</span>
+        <span>[F11] Fullscreen</span>
       </div>
     </footer>
 
@@ -1574,9 +1606,46 @@
       }
     }
 
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(err => {
+            console.log("Fullscreen request error:", err);
+          });
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      const isFull = !!document.fullscreenElement;
+      const btn = document.getElementById("btn-fullscreen");
+      const icon = document.getElementById("fullscreen-icon");
+      const text = document.getElementById("fullscreen-text");
+      if (btn && icon && text) {
+        if (isFull) {
+          btn.classList.add("active");
+          text.innerText = "RESTORE [F11]";
+          icon.innerHTML = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>';
+        } else {
+          btn.classList.remove("active");
+          text.innerText = "FULLSCREEN [F11]";
+          icon.innerHTML = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
+        }
+      }
+    });
+
     // KEYBOARD SHORTCUTS
     window.addEventListener("keydown", (e) => {
       if (e.target.tagName === "INPUT") return;
+      if (e.key === "F11") {
+        e.preventDefault();
+        toggleFullScreen();
+        return;
+      }
       const k = e.key.toLowerCase();
       if (k === "1") selectOperatingMode("quiet");
       else if (k === "2") selectOperatingMode("balanced");
