@@ -39,6 +39,7 @@ pub struct HardwareMetrics {
     pub current_profile: String,
     pub battery_limiter_active: bool,
     pub backlight_timeout_active: bool,
+    pub usb_charging_active: bool,
 }
 
 pub struct HardwareManager {
@@ -51,6 +52,7 @@ pub struct HardwareManager {
     pub gpu_fan_speed: u8,
     pub battery_limiter: bool,
     pub backlight_timeout: bool,
+    pub usb_charging: bool,
 }
 
 impl HardwareManager {
@@ -59,6 +61,7 @@ impl HardwareManager {
         let active_profile = Self::read_platform_profile();
         let battery_limiter = Self::read_battery_limiter();
         let backlight_timeout = Self::read_backlight_timeout();
+        let usb_charging = Self::read_usb_charging();
         Self {
             prev_cpu_total: total,
             prev_cpu_idle: idle,
@@ -69,6 +72,7 @@ impl HardwareManager {
             gpu_fan_speed: 50,
             battery_limiter,
             backlight_timeout,
+            usb_charging,
         }
     }
 
@@ -136,6 +140,7 @@ impl HardwareManager {
         let current_profile = self.active_profile.clone();
         let battery_limiter_active = self.battery_limiter;
         let backlight_timeout_active = self.backlight_timeout;
+        let usb_charging_active = self.usb_charging;
 
         HardwareMetrics {
             cpu_temp_c,
@@ -161,6 +166,7 @@ impl HardwareManager {
             current_profile,
             battery_limiter_active,
             backlight_timeout_active,
+            usb_charging_active,
         }
     }
 
@@ -450,6 +456,11 @@ impl HardwareManager {
         Self::set_backlight_timeout(enabled)
     }
 
+    pub fn apply_usb_charging(&mut self, enabled: bool) -> Result<()> {
+        self.usb_charging = enabled;
+        Self::set_usb_charging(enabled)
+    }
+
     pub fn set_platform_profile(mode: &str) -> Result<()> {
         let valid_modes = ["quiet", "balanced", "performance", "low-power"];
         let target = mode.to_lowercase();
@@ -673,6 +684,28 @@ impl HardwareManager {
         }
 
         let _ = crate::ec::AcerEc::set_backlight_timeout(enabled);
+        Ok(())
+    }
+
+    fn read_usb_charging() -> bool {
+        if let Some(base) = Self::find_driver_sysfs_path() {
+            let file = base.join("usb_charging");
+            if let Ok(content) = fs::read_to_string(file) {
+                let val = content.trim();
+                return val != "0" && !val.is_empty();
+            }
+        }
+        true
+    }
+
+    pub fn set_usb_charging(enabled: bool) -> Result<()> {
+        let val = if enabled { "30" } else { "0" };
+        if let Some(base) = Self::find_driver_sysfs_path() {
+            let file = base.join("usb_charging");
+            if file.exists() {
+                let _ = fs::write(&file, val);
+            }
+        }
         Ok(())
     }
 

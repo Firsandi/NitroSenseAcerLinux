@@ -253,6 +253,13 @@ fn handle_connection(mut stream: TcpStream, hw: Arc<Mutex<HardwareManager>>) {
             let _ = mgr.apply_backlight_timeout(timeout == "on");
         }
         send_response(&mut stream, 200, "application/json", b"{\"status\":\"ok\"}");
+    } else if method == "POST" && path == "/api/usb-charging" {
+        if let Ok(json) = serde_json::from_str::<Value>(&body) {
+            let enabled = json["enabled"].as_bool().unwrap_or(true);
+            let mut mgr = hw.lock().unwrap();
+            let _ = mgr.apply_usb_charging(enabled);
+        }
+        send_response(&mut stream, 200, "application/json", b"{\"status\":\"ok\"}");
     } else {
         send_response(&mut stream, 404, "text/plain", b"Not Found");
     }
